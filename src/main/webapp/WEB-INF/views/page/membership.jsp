@@ -72,7 +72,35 @@
     					id="emailCheck"
                         class="btn btn-primary btn-user btn-block"
                       >
-                        중복확인
+                        중복 확인
+                      </button>
+                    </div>
+                  </div>
+                 <div id="emailAuthForm" class="form-group row flex" style="display:none">
+                    <div class="col-sm-6 mb-3 mb-sm-0">
+                      <input
+                      	data-title="이메일 인증"
+                      	name="emailAuth"
+                      	id="emailAuthInput"
+                      	class="form-control form-control-user position-relative"
+                      	type="text"
+                        placeholder="인증번호"
+                      />
+                      <span id="authTimer" class="position-absolute small text-primary" style="right:30px; bottom:15px"></span>
+                    </div>
+                    <div class="col-sm-3">
+                      <button
+    					id="sendAuthBtn"
+                        class="btn btn-primary btn-user btn-block mt-0"
+                      >
+                        인증번호 전송
+                      </button>
+					<button
+    					id="checkAuthBtn"
+                        class="btn btn-primary btn-user btn-block mt-0"
+                        style="display:none"
+                      >
+                        이메일 인증
                       </button>
                     </div>
                   </div>

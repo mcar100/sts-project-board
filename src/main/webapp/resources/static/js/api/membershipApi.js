@@ -15,4 +15,15 @@ function checkDuplicatedUserInfo(inputType, inputValue){
 	return requestApi('get', '/membership/user', apiData);
 }
 
-export { insertUserInfo, checkDuplicatedUserInfo }
+function sendAuthNumberToEmail(email){
+	const apiData = convertApiDataFormat(null,null,email,"json");
+	return requestApi('post','/membership/send',apiData, "json");
+}
+
+function checkUserAuthNum(userCode){
+	const apiData = convertApiDataFormat(null,null,userCode,"json");
+	return requestApi('post','/membership/verify',apiData, "json");
+}
+
+
+export { insertUserInfo, checkDuplicatedUserInfo, sendAuthNumberToEmail, checkUserAuthNum }

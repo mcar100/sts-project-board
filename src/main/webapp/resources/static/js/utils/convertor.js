@@ -25,6 +25,17 @@ function convertApiDataFormat(pathVar=null,requestParams=null,data=null,type='js
 	};;
 }
 
+function convertSecondToTimerFormat(timer){
+	if(timer < 60){
+		return [0,timer];
+	}
+	
+	if(timer%60===0){
+		return [(timer/60)-1,59];
+	}
+	return [Math.floor(timer/60),timer%60];
+}
+
 function changeObjectKeyName(object, prevName, afterName){
 	if(object[prevName]){
 		object[afterName] = object[prevName];
@@ -32,4 +43,4 @@ function changeObjectKeyName(object, prevName, afterName){
 	}
 }
 
-export { convertFormDataToObject, convertStringToBytes, getPathNameNumber, convertApiDataFormat, changeObjectKeyName }
+export { convertFormDataToObject, convertStringToBytes, getPathNameNumber, convertApiDataFormat, changeObjectKeyName, convertSecondToTimerFormat }

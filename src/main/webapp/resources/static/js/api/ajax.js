@@ -12,6 +12,7 @@ function formatData(data, type){
 	if(type==="json") return [JSON.stringify(data), "application/json; charset=utf-8"];
 	else if(type==="file") return [processFormData(data) , false];
 	else if(type==="formData") return [processFormData(data), "multipart/form-data"];
+	else if(type==="string") return [data, false];
 }
 
 function formatUrl(url, pathVar, requestParams){

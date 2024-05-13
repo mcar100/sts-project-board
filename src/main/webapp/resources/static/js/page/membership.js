@@ -1,6 +1,6 @@
-import { validator, preventInputs, checkFormInfo, validateMap } from '../utils/validator.js';
-import { checkDuplicatedUserInfo, insertUserInfo } from '../api/membershipApi.js';
-import { convertFormDataToObject } from '../utils/convertor.js';
+import { validator, preventInputs, checkFormInfo, validateMap, isNotBlank } from '../utils/validator.js';
+import { checkDuplicatedUserInfo, checkUserAuthNum, insertUserInfo, sendAuthNumberToEmail } from '../api/membershipApi.js';
+import { convertFormDataToObject, convertSecondToTimerFormat } from '../utils/convertor.js';
 import {ValidatorAlert, thrownHandler} from '../models/ValidatorAlert.js';
 
 $(document).ready(function(){
@@ -15,6 +15,8 @@ $(document).ready(function(){
 	$("#emailCheck").on({
 		click: handleEmailBtnClick,
 	});
+	$("#sendAuthBtn").click(handleSendAuthBtnClick);
+	$("#checkAuthBtn").click(handleCheckAuthBtnClick);
 	$("#passwordInput").on("change",handlePasswordChange);
 	$("#passwordCheckInput").on("change",handlePasswordConfirmChange);
 	$("#phoneInput").on({
@@ -28,6 +30,7 @@ $(document).ready(function(){
 const membershipStat = {
 	isNotDuplicatedName: false,
 	isNotDuplicatedEmail: false,
+	isEmailVerify: false,
 	isValidPassword: false,
 	isPasswordConfirm: false,
 };
@@ -44,6 +47,8 @@ const classMap = {
 		"error": "form-msg form-msg-error",
 	}
 }
+
+const timerIdArray = [];
 
 async function handleNameChange(){
 	const [name, value] = [$(this).attr("name"), $(this).val()];
@@ -97,7 +102,15 @@ function handleOnInput(){
 
 function handleEmailChange(){
 	membershipStat.isNotDuplicatedEmail = false;
+	membershipStat.isEmailVerify = false;
 	addTargetClass($(this), "normal");
+	
+	addTargetClass($("#emailAuthInput"),"normal");
+	$("#emailAuthInput").attr("disabled",false);
+	$("#emailAuthInput").val("");
+	$("#sendAuthBtn").show();
+	$("#checkAuthBtn").attr("disabled",false);
+	$("#checkAuthBtn").hide();
 }
 
 
@@ -117,7 +130,8 @@ async function handleEmailBtnClick(e){
 		if(!isDuplicated){
 			addTargetClass($(emailInput), "clear");
 			membershipStat.isNotDuplicatedEmail = true;
-			throw new ValidatorAlert(validateMsg, $("#passwordInput"));
+			$("#emailAuthForm").show();
+			throw new ValidatorAlert(validateMsg, $("#emailAuthInput"));
 		}
 		else{
 			addTargetClass($(emailInput), "error");	
@@ -127,6 +141,89 @@ async function handleEmailBtnClick(e){
 	catch(thrown){
 		thrownHandler(thrown);
 	}
+}
+
+async function handleSendAuthBtnClick(e){
+	e.preventDefault();
+	try{
+		if(!membershipStat.isNotDuplicatedEmail){
+			throw new ValidatorAlert('이메일 중복 검사를 먼저 실시해주세요!',$("#emailInput"));
+		}
+		const email = $("#emailInput").val();
+		const result = await sendAuthNumberToEmail({'email': email});
+		if(!result){
+			throw new ValidatorAlert("인증번호가 전송에 실패했습니다.", $("#emailAuthInput"));
+		}
+		handleTimePass();
+		$(this).hide();
+		$("#checkAuthBtn").show();
+		throw new ValidatorAlert("해당 이메일로 인증번호가 전송되었습니다.", $("#emailAuthInput"));
+	}
+	catch(thrown){
+		thrownHandler(thrown);
+	}
+}
+
+async function handleCheckAuthBtnClick(e){
+	e.preventDefault();
+	try{
+		if(!membershipStat.isNotDuplicatedEmail){
+			throw new ValidatorAlert('이메일 중복 검사를 먼저 실시해주세요!',$("#emailInput"));
+		}
+		
+		const userInput = $("#emailAuthInput");
+		if(!isNotBlank(userInput.val())){
+			throw new ValidatorAlert('인증번호를 입력해주세요.',$("#emailAuthInput"));
+		}
+		
+		
+		const result = await checkUserAuthNum({'userNum':userInput.val()});
+		
+		if(!result){
+			membershipStat.isEmailVerify = false;
+			addTargetClass(userInput, "error");
+			throw new ValidatorAlert('이메일 인증에 실패했습니다.',userInput);
+		}
+		else{
+			membershipStat.isEmailVerify = true;
+			addTargetClass(userInput, "clear");
+			userInput.attr("disabled",true);
+			$(this).attr("disabled",true);
+			for(let i=0;i<timerIdArray.length;i++){
+				clearInterval(timerIdArray[i]);
+			}
+			$("#authTimer").empty();
+			throw new ValidatorAlert('인증되었습니다.',$("#passwordInput"));
+		}
+	}
+	catch(thrown){
+		thrownHandler(thrown);
+	}
+}
+
+function handleTimePass(){
+	let [timer,timerId] = [60*5,0];	// 5분
+	let [minute, second] = convertSecondToTimerFormat(timer); 
+	
+	timerId = setInterval(function(){
+		if(second !== 0){
+			second -= 1;
+		}
+		else{
+			if(minute>0){
+				minute -=1;
+				second = 59;
+			}
+			else{
+				clearInterval(timerId);
+				$("#sendAuthBtn").show();
+				$("#checkAuthBtn").hide();
+			}
+		}
+
+		$("#authTimer").text(`${minute}:${String(second).padStart(2,"0")}`);
+	},1000);
+	timerIdArray.push(timerId);
 }
 
 function handlePasswordChange(){
@@ -236,6 +333,10 @@ async function handleFormSubmit(e){
 		
 		if(!membershipStat.isNotDuplicatedEmail){
 			throw new ValidatorAlert("이메일 중복확인을 진행해주세요.", $(`[name="email"]`));
+		}
+		
+		if(!membershipStat.isEmailVerify){
+			throw new ValidatorAlert("이메일 인증을 진행해주세요.", $(`[name="email"]`));
 		}
 		
 		if(userInfo.password!==userInfo.passwordCheck||!membershipStat.isPasswordConfirm){
