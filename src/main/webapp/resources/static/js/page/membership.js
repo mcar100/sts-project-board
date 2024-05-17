@@ -111,6 +111,7 @@ function handleEmailChange(){
 	$("#sendAuthBtn").show();
 	$("#checkAuthBtn").attr("disabled",false);
 	$("#checkAuthBtn").hide();
+	clearTimer();
 }
 
 
@@ -189,10 +190,7 @@ async function handleCheckAuthBtnClick(e){
 			addTargetClass(userInput, "clear");
 			userInput.attr("disabled",true);
 			$(this).attr("disabled",true);
-			for(let i=0;i<timerIdArray.length;i++){
-				clearInterval(timerIdArray[i]);
-			}
-			$("#authTimer").empty();
+			clearTimer();
 			throw new ValidatorAlert('인증되었습니다.',$("#passwordInput"));
 		}
 	}
@@ -224,6 +222,13 @@ function handleTimePass(){
 		$("#authTimer").text(`${minute}:${String(second).padStart(2,"0")}`);
 	},1000);
 	timerIdArray.push(timerId);
+}
+
+function clearTimer(){
+	for(let i=0;i<timerIdArray.length;i++){
+		clearInterval(timerIdArray[i]);
+	}
+	$("#authTimer").empty();
 }
 
 function handlePasswordChange(){
