@@ -1,6 +1,6 @@
 package com.example.demo.util;
 
-import com.example.demo.model.SearchDTO;
+import com.example.demo.board.model.SearchDTO;
 
 public class PaginationHelper {
 	

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.demo.mapper.BoardMapper">
-	<insert id="insertBoardData" parameterType="com.example.demo.model.Board" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
+<mapper namespace="com.example.demo.board.mapper.BoardMapper">
+	<insert id="insertBoardData" parameterType="com.example.demo.board.model.Board" useGeneratedKeys="true" keyProperty="id" keyColumn="id">
 		INSERT 
 			INTO board (title, content, user_id) 
 			VALUES (#{title}, #{content, jdbcType=CLOB}, #{userId}) 
@@ -11,7 +11,7 @@
 			COUNT(*) FROM board 
 			WHERE status = 'PUBLIC'
 	</select>
-	<select id="selectBoardDataInRange" parameterType="com.example.demo.model.SearchDTO" resultType="hashmap">
+	<select id="selectBoardDataInRange" parameterType="com.example.demo.board.model.SearchDTO" resultType="hashmap">
 		SELECT 
 			RN as "rowNum",b.id as "boardId", b.title as "title", TO_CHAR(b.created_at, 'YYYY-MM-DD') as "createdAt", u.name as "userName", COUNT(c.id) as "commentsCount"
    			FROM (SELECT ROWNUM RN, public_ordered_board.* FROM (SELECT * FROM board WHERE status = 'PUBLIC' ORDER BY created_at) public_ordered_board) b, users u, comments c
@@ -34,7 +34,7 @@
 		INNER JOIN users u ON b.user_id = u.id
 		WHERE b.id = #{boardId}
 	</select>
-	<update id="updateBoardData" parameterType="com.example.demo.model.Board">
+	<update id="updateBoardData" parameterType="com.example.demo.board.model.Board">
 		UPDATE board
 			SET 
 				title = #{title},

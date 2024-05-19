@@ -53,7 +53,6 @@ const timerIdArray = [];
 async function handleNameChange(){
 	const [name, value] = [$(this).attr("name"), $(this).val()];
 	const [isValid, validateMsg] = validator(name, value); 
-	
 	const msgTag = `#${name}_msg`;
 	addTargetClass($(this), "normal");
 	
@@ -324,6 +323,7 @@ async function handleFormSubmit(e){
 	e.preventDefault();
 	const userForm = $('#registerForm').serializeArray();
 	const userInfo = convertFormDataToObject(userForm);
+	
 	const [isCheck, checkMsg, invalidTarget] = checkFormInfo(userInfo);
 	
 	try{	

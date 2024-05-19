@@ -3,7 +3,7 @@ package com.example.demo.util;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.example.demo.model.Comment;
+import com.example.demo.board.model.Comment;
 
 public class CommentHelper {
 	
